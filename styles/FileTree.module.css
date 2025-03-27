@@ -1,0 +1,89 @@
+.container {
+    margin-top: 2rem;
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.tree {
+    font-family: monospace;
+}
+
+.node {
+    margin: 2px 0;
+}
+
+.nodeContent {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.nodeContent:hover {
+    background: #334155;
+}
+
+.toggle {
+    margin-right: 8px;
+    font-size: 12px;
+    width: 16px;
+    display: inline-block;
+    color: #38bdf8;
+}
+
+.name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #e2e8f0;
+}
+
+.size {
+    margin-left: 16px;
+    color: #7dd3fc;
+    font-weight: 500;
+}
+
+.skippedSection {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #334155;
+}
+
+.skippedSection h3 {
+    color: #e2e8f0;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.skippedFiles {
+    background: #2d1a1a;
+    border-radius: 4px;
+    padding: 0.5rem;
+}
+
+.skippedFile {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    color: #fecaca;
+    font-size: 0.9em;
+}
+
+.skippedFile .name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.skippedFile .reason {
+    margin-left: 16px;
+    color: #dc8f8f;
+    font-size: 0.85em;
+}

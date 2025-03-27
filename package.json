@@ -1,0 +1,29 @@
+{
+  "name": "filesizeanalyzer",
+  "version": "1.0.0",
+  "description": "Analyze and visualize directory sizes",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "npm install -g concurrently",
+    "start": "concurrently \"npm run server\" \"npm run frontend\"",
+    "server": "node backend/server.js",
+    "frontend": "next dev -p 5341",
+    "cleanup": "rimraf .next node_modules && npm cache clean --force",
+    "reinstall-packages": "npm run cleanup && npm install --production"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "d3": "^7.8.5",
+    "express": "^4.18.2",
+    "next": "^14.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "rimraf": "^5.0.1"
+  }
+}
