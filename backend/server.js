@@ -25,6 +25,9 @@ const ignorePaths = [
 
 const supportedVideoExtensions = ['.mp4', '.mkv', '.avi', '.mov', '.wmv'];
 
+const MAX_PATH_LENGTH = 32767;
+const LONG_PATH_PREFIX = '\\\\?\\';
+
 const isVideoFile = (filename) => {
     const ext = path.extname(filename).toLowerCase();
     return supportedVideoExtensions.includes(ext);
@@ -76,8 +79,12 @@ const getShortPathName = async (longPath) => {
 
 const attemptFileAccess = async (filePath) => {
     try {
+        const normalizedPath = filePath.length > 260 && !filePath.startsWith(LONG_PATH_PREFIX) 
+            ? LONG_PATH_PREFIX + filePath 
+            : filePath;
+
         try {
-            return await fs.stat(filePath);
+            return await fs.stat(normalizedPath);
         } catch (e) {
             const shortPath = await getShortPathName(filePath);
             if (shortPath && shortPath !== filePath) {
@@ -86,7 +93,8 @@ const attemptFileAccess = async (filePath) => {
             throw e;
         }
     } catch (error) {
-        throw new Error(`Cannot access file: ${error.message}`);
+        log(`Cannot access file: ${filePath.substring(0, 100)}... (${error.message})`);
+        return null;
     }
 };
 
@@ -96,9 +104,13 @@ const hasProblematicCharacters = (str) => {
 
 async function scanDirectory(dirPath) {
     try {
-        if (!await isValidPath(dirPath)) {
+        const normalizedPath = dirPath.length > 260 && !dirPath.startsWith(LONG_PATH_PREFIX)
+            ? LONG_PATH_PREFIX + dirPath
+            : dirPath;
+
+        if (!await isValidPath(normalizedPath)) {
             try {
-                const shortPath = await getShortPathName(dirPath);
+                const shortPath = await getShortPathName(normalizedPath);
                 if (!await isValidPath(shortPath)) {
                     log('Invalid directory:', dirPath);
                     return { files: [], skipped: [] };
@@ -117,10 +129,10 @@ async function scanDirectory(dirPath) {
 
         let items;
         try {
-            items = await fs.readdir(dirPath);
+            items = await fs.readdir(normalizedPath);
         } catch (err) {
-            const longPath = `\\\\?\\${dirPath}`;
-            items = await fs.readdir(longPath);
+            log(`Directory read error: ${err.message}`);
+            return { files: [], skipped: [] };
         }
 
         let results = [];
@@ -128,6 +140,16 @@ async function scanDirectory(dirPath) {
 
         for (const itemName of items) {
             try {
+                let fullPath = path.join(dirPath, itemName);
+                if (fullPath.length > MAX_PATH_LENGTH) {
+                    skippedFiles.push({
+                        name: itemName,
+                        path: fullPath,
+                        reason: 'Path too long'
+                    });
+                    continue;
+                }
+
                 if (hasProblematicCharacters(itemName)) {
                     log(`Skipping file with problematic characters: ${itemName}`);
                     skippedFiles.push({
@@ -140,7 +162,7 @@ async function scanDirectory(dirPath) {
 
                 if (itemName.endsWith('.lnk')) continue;
 
-                const fullPath = path.join(dirPath, itemName);
+                fullPath = path.join(dirPath, itemName);
 
                 try {
                     const stats = await attemptFileAccess(fullPath);
@@ -168,10 +190,20 @@ async function scanDirectory(dirPath) {
                     }
                 } catch (accessError) {
                     log(`Access error for ${fullPath}: ${accessError.message}`);
+                    skippedFiles.push({
+                        name: itemName,
+                        path: fullPath,
+                        reason: 'Access error: ' + accessError.message
+                    });
                     continue;
                 }
             } catch (error) {
-                log('Item processing error:', error.message);
+                log(`Item processing error: ${error.message}`);
+                skippedFiles.push({
+                    name: itemName,
+                    path: path.join(dirPath, itemName),
+                    reason: 'Access error: ' + error.message
+                });
                 continue;
             }
         }
@@ -182,8 +214,15 @@ async function scanDirectory(dirPath) {
             skipped: skippedFiles
         };
     } catch (error) {
-        log('Scan directory error:', error.message);
-        return { files: [], skipped: [] };
+        log(`Scan directory error: ${error.message}`);
+        return { 
+            files: [], 
+            skipped: [{
+                name: path.basename(dirPath),
+                path: dirPath,
+                reason: 'Directory scan failed: ' + error.message
+            }]
+        };
     }
 }
 
