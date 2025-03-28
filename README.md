@@ -35,7 +35,7 @@ A simple tool to analyze and visualize directory sizes on your computer.
 
 ## Notes
 
-- Clicking on the "more files" button in the visualisation displays then next 25 biggest files
+- Clicking on the "more files" button in the visualisation displays the next 25 biggest files
 - Some system folders and files might be inaccessible
 - Large directories may take a moment to scan
 - The visualization shows the 25 largest files by default
