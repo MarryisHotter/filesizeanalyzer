@@ -1,12 +1,12 @@
 .container {
     position: relative;
-    margin-top: 3.5rem;  /* Increased margin to avoid overlap */
+    margin-top: 3.5rem;
 }
 
 .treemap {
     background-color: var(--bg-secondary);
     border-radius: 8px;
-    margin-top: 0.5rem;  /* Reduced margin here */
+    margin-top: 0.5rem;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
@@ -57,7 +57,7 @@
     stroke: var(--bg-primary);
     opacity: 0.9;
     transition: all 0.2s ease;
-    cursor: inherit;  /* Inherit cursor from parent */
+    cursor: inherit;
 }
 
 .rectangle:hover {

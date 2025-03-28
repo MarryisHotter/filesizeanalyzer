@@ -5,6 +5,7 @@ const { Buffer } = require('buffer');
 const { exec } = require('child_process');
 const util = require('util');
 const execPromise = util.promisify(exec);
+const execAsync = util.promisify(exec);
 const app = express();
 const cors = require('cors');
 
@@ -204,6 +205,50 @@ app.post('/api/scan', async (req, res) => {
             error: error.message,
             code: error.code || 'INVALID_PATH'
         });
+    }
+});
+
+app.get('/api/drives', async (req, res) => {
+    try {
+        const { stdout } = await execAsync('wmic logicaldisk get caption');
+        const drives = stdout
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => /^[A-Z]:$/.test(line));
+        
+        res.json({ drives });
+    } catch (error) {
+        res.json({ drives: ['C:'] });
+    }
+});
+
+app.get('/api/browse', async (req, res) => {
+    try {
+        const dirPath = req.query.path || 'C:\\';
+        const items = await fs.readdir(dirPath);
+        const directories = [];
+
+        for (const item of items) {
+            const fullPath = path.join(dirPath, item);
+            try {
+                const stats = await fs.stat(fullPath);
+                if (stats.isDirectory() && !shouldIgnorePath(fullPath)) {
+                    directories.push({
+                        name: item,
+                        path: fullPath
+                    });
+                }
+            } catch (error) {
+                continue;
+            }
+        }
+
+        res.json({
+            current: dirPath,
+            directories: directories.sort((a, b) => a.name.localeCompare(b.name))
+        });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 });
 

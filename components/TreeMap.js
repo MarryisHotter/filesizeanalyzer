@@ -46,7 +46,12 @@ export default function TreeMap({ data: initialData }) {
     };
 
     const resetView = () => {
-        setCurrentData(initialData);
+        const transformedData = {
+            name: initialData.name,
+            size: initialData.size,
+            children: initialData.files
+        };
+        setCurrentData(transformedData);
         setDrillDownHistory([]);
     };
 

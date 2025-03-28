@@ -41,3 +41,22 @@
     margin: 1rem 0;
     border: 1px solid #ff6b6b;
 }
+
+.buttonSecondary {
+    padding: 0.5rem 1rem;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--text-secondary);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.buttonSecondary:hover {
+    background-color: var(--bg-hover);
+}
+
+.buttonSecondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

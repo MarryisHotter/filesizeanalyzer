@@ -30,7 +30,6 @@ body {
     box-sizing: border-box;
 }
 
-/* Override browser console styles */
 @media screen {
     body {
         background-color: var(--bg-primary) !important;

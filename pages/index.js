@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import TreeMap from '../components/TreeMap';
 import FileTree from '../components/FileTree';
+import DirectoryBrowser from '../components/DirectoryBrowser';
 import styles from '../styles/Home.module.css';
 
 export default function Home() {
@@ -8,10 +9,24 @@ export default function Home() {
     const [path, setPath] = useState('C:\\');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [setDrives] = useState(['C:']);
+    const [isDirectoryBrowserOpen, setIsDirectoryBrowserOpen] = useState(false);
 
     useEffect(() => {
         console.log('%cFile Size Analyzer Started', 'color: #007acc; font-size: 14px; font-weight: bold;');
+        getDrivesList().then(setDrives);
     }, []);
+
+    const getDrivesList = async () => {
+        try {
+            const response = await fetch('http://localhost:3003/api/drives');
+            const { drives } = await response.json();
+            return drives;
+        } catch (error) {
+            console.error('Failed to get drives:', error);
+            return ['C:'];
+        }
+    };
 
     const scanDirectory = async () => {
         setLoading(true);
@@ -59,6 +74,10 @@ export default function Home() {
         setLoading(false);
     };
 
+    const openDirectoryDialog = () => {
+        setIsDirectoryBrowserOpen(true);
+    };
+
     const calculateTotalSize = (items) => {
         return items.reduce((total, item) => {
             if (item.children) {
@@ -86,6 +105,12 @@ export default function Home() {
                     className={styles.input}
                 />
                 <button 
+                    onClick={openDirectoryDialog}
+                    className={styles.buttonSecondary}
+                >
+                    Browse...
+                </button>
+                <button 
                     onClick={scanDirectory}
                     disabled={loading}
                     className={styles.button}
@@ -100,6 +125,14 @@ export default function Home() {
                     <FileTree data={data} />
                 </>
             )}
+            <DirectoryBrowser 
+                isOpen={isDirectoryBrowserOpen}
+                onClose={() => setIsDirectoryBrowserOpen(false)}
+                onSelect={(selectedPath) => {
+                    setPath(selectedPath);
+                    setIsDirectoryBrowserOpen(false);
+                }}
+            />
         </div>
     );
 }
